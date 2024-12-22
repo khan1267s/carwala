@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Car Auction Website</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <header>
+        <h1>Welcome to the Car Auction Platform</h1>
+        <nav>
+            <ul>
+                <li><a href="#home">Home</a></li>
+                <li><a href="#admin">Admin Panel</a></li>
+                <li><a href="#user">User Panel</a></li>
+                <li><a href="#about">About</a></li>
+            </ul>
+        </nav>
+    </header>
+
+    <main>
+        <section id="home">
+            <h2>Home</h2>
+            <p>Explore the latest cars available for auction and place your bids!</p>
+        </section>
+
+        <section id="admin">
+            <h2>Admin Panel</h2>
+            <form id="admin-form">
+                <h3>Upload Car Details</h3>
+                <label for="car-image">Car Image:</label>
+                <input type="file" id="car-image" name="car-image" accept="image/*" required>
+
+                <label for="car-name">Car Name:</label>
+                <input type="text" id="car-name" name="car-name" required>
+
+                <label for="car-price">Price:</label>
+                <input type="number" id="car-price" name="car-price" required>
+
+                <label for="car-details">Details:</label>
+                <textarea id="car-details" name="car-details" required></textarea>
+
+                <button type="submit">Upload</button>
+            </form>
+
+            <div id="admin-bids">
+                <h3>View Bids</h3>
+                <ul id="bids-list">
+                    <!-- Bids will appear here dynamically -->
+                </ul>
+            </div>
+        </section>
+
+        <section id="user">
+            <h2>User Panel</h2>
+            <div id="cars-list">
+                <!-- Cars will appear here dynamically -->
+            </div>
+
+            <form id="bid-form">
+                <h3>Place a Bid</h3>
+                <label for="car-id">Select Car:</label>
+                <select id="car-id" name="car-id" required>
+                    <!-- Car options will appear dynamically -->
+                </select>
+
+                <label for="bid-amount">Bid Amount:</label>
+                <input type="number" id="bid-amount" name="bid-amount" required>
+
+                <button type="submit">Place Bid</button>
+            </form>
+        </section>
+
+        <section id="about">
+            <h2>About</h2>
+            <p>This platform enables users to bid on cars and admins to manage car auctions.</p>
+        </section>
+    </main>
+
+    <footer>
+        <p>&copy; 2024 Car Auction Platform</p>
+    </footer>
+
+    <script src="scripts.js"></script>
+</body>
+</html>
