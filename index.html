@@ -82,6 +82,89 @@
         <p>&copy; 2024 Car Auction Platform</p>
     </footer>
 
-    <script src="scripts.js"></script>
+    <script>
+        // Simulated database for cars and bids
+        const cars = [];
+        const bids = [];
+
+        // Admin Form Submission
+        document.getElementById('admin-form').addEventListener('submit', function(event) {
+            event.preventDefault();
+
+            const carImage = document.getElementById('car-image').files[0];
+            const carName = document.getElementById('car-name').value;
+            const carPrice = document.getElementById('car-price').value;
+            const carDetails = document.getElementById('car-details').value;
+
+            const car = {
+                id: cars.length + 1,
+                name: carName,
+                price: carPrice,
+                details: carDetails,
+                image: URL.createObjectURL(carImage),
+            };
+
+            cars.push(car);
+            displayCars();
+            populateCarOptions();
+        });
+
+        // Display Cars for Users
+        function displayCars() {
+            const carsList = document.getElementById('cars-list');
+            carsList.innerHTML = '';
+            cars.forEach(car => {
+                const carDiv = document.createElement('div');
+                carDiv.innerHTML = `
+                    <img src="${car.image}" alt="${car.name}" width="200">
+                    <h4>${car.name}</h4>
+                    <p>Price: $${car.price}</p>
+                    <p>${car.details}</p>
+                `;
+                carsList.appendChild(carDiv);
+            });
+        }
+
+        // Populate Car Options in Bid Form
+        function populateCarOptions() {
+            const carSelect = document.getElementById('car-id');
+            carSelect.innerHTML = '';
+            cars.forEach(car => {
+                const option = document.createElement('option');
+                option.value = car.id;
+                option.textContent = car.name;
+                carSelect.appendChild(option);
+            });
+        }
+
+        // User Bid Submission
+        document.getElementById('bid-form').addEventListener('submit', function(event) {
+            event.preventDefault();
+
+            const carId = parseInt(document.getElementById('car-id').value);
+            const bidAmount = parseFloat(document.getElementById('bid-amount').value);
+
+            const bid = {
+                carId,
+                amount: bidAmount,
+            };
+
+            bids.push(bid);
+            displayBids();
+        });
+
+        // Display Bids for Admin
+        function displayBids() {
+            const bidsList = document.getElementById('bids-list');
+            bidsList.innerHTML = '';
+            bids.forEach(bid => {
+                const car = cars.find(c => c.id === bid.carId);
+                const bidItem = document.createElement('li');
+                bidItem.textContent = `Bid for ${car.name}: $${bid.amount}`;
+                bidsList.appendChild(bidItem);
+            });
+        }
+    </script>
 </body>
 </html>
+
