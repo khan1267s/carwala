@@ -91,12 +91,18 @@
             background-color: #003d80;
         }
 
+        #cars-list {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 20px;
+            margin-top: 20px;
+        }
+
         #cars-list div {
             background-color: white;
             padding: 20px;
             border: 1px solid #ccc;
             border-radius: 5px;
-            margin-bottom: 20px;
             text-align: center;
         }
 
@@ -154,13 +160,6 @@
 
                 <button type="submit">Upload</button>
             </form>
-
-            <div id="admin-bids">
-                <h3>Current Bids</h3>
-                <ul id="bids-list">
-                    <!-- Bids will appear dynamically -->
-                </ul>
-            </div>
         </section>
 
         <section id="user">
@@ -194,7 +193,81 @@
     </footer>
 
     <script>
-        // JavaScript code remains unchanged for dynamic functionality
+        const cars = [];
+        const bids = [];
+
+        document.getElementById('admin-form').addEventListener('submit', function(event) {
+            event.preventDefault();
+
+            const carImage = document.getElementById('car-image').files[0];
+            const carName = document.getElementById('car-name').value;
+            const carPrice = document.getElementById('car-price').value;
+            const carDetails = document.getElementById('car-details').value;
+
+            const car = {
+                id: cars.length + 1,
+                name: carName,
+                price: carPrice,
+                details: carDetails,
+                image: URL.createObjectURL(carImage),
+            };
+
+            cars.push(car);
+            displayCars();
+            populateCarOptions();
+        });
+
+        function displayCars() {
+            const carsList = document.getElementById('cars-list');
+            carsList.innerHTML = '';
+            cars.forEach(car => {
+                const carDiv = document.createElement('div');
+                carDiv.innerHTML = `
+                    <img src="${car.image}" alt="${car.name}">
+                    <h4>${car.name}</h4>
+                    <p>Price: $${car.price}</p>
+                    <p>${car.details}</p>
+                `;
+                carsList.appendChild(carDiv);
+            });
+        }
+
+        function populateCarOptions() {
+            const carSelect = document.getElementById('car-id');
+            carSelect.innerHTML = '';
+            cars.forEach(car => {
+                const option = document.createElement('option');
+                option.value = car.id;
+                option.textContent = car.name;
+                carSelect.appendChild(option);
+            });
+        }
+
+        document.getElementById('bid-form').addEventListener('submit', function(event) {
+            event.preventDefault();
+
+            const carId = parseInt(document.getElementById('car-id').value);
+            const bidAmount = parseFloat(document.getElementById('bid-amount').value);
+
+            const bid = {
+                carId,
+                amount: bidAmount,
+            };
+
+            bids.push(bid);
+            displayBids();
+        });
+
+        function displayBids() {
+            const bidsList = document.getElementById('bids-list');
+            bidsList.innerHTML = '';
+            bids.forEach(bid => {
+                const car = cars.find(c => c.id === bid.carId);
+                const bidItem = document.createElement('li');
+                bidItem.textContent = `Bid for ${car.name}: $${bid.amount}`;
+                bidsList.appendChild(bidItem);
+            });
+        }
     </script>
 </body>
 </html>
