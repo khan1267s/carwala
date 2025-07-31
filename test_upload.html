@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Upload Test - TED Talk Clip Generator</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 40px; }
+        .test-section { margin: 20px 0; padding: 20px; border: 1px solid #ddd; }
+        .error { color: red; }
+        .success { color: green; }
+        .info { color: blue; }
+    </style>
+</head>
+<body>
+    <h1>🔧 Upload Test & Diagnostics</h1>
+    
+    <div class="test-section">
+        <h2>1. Server Status</h2>
+        <button onclick="testServer()">Test Server Connection</button>
+        <div id="serverStatus"></div>
+    </div>
+    
+    <div class="test-section">
+        <h2>2. Simple Upload Test</h2>
+        <form id="uploadForm">
+            <input type="file" id="fileInput" accept="video/*" required>
+            <br><br>
+            <button type="submit">Test Upload</button>
+        </form>
+        <div id="uploadResult"></div>
+    </div>
+    
+    <div class="test-section">
+        <h2>3. Common Issues & Solutions</h2>
+        <ul>
+            <li><strong>File too large:</strong> Make sure your video is under 2GB</li>
+            <li><strong>Wrong format:</strong> Use MP4, AVI, MOV, MKV, or WEBM files</li>
+            <li><strong>Browser issues:</strong> Try refreshing the page or using Chrome/Firefox</li>
+            <li><strong>Server error:</strong> Check if the server is running at localhost:5000</li>
+        </ul>
+    </div>
+    
+    <div class="test-section">
+        <h2>4. Quick Fixes</h2>
+        <button onclick="window.location.href='/'">Go Back to Main App</button>
+        <button onclick="location.reload()">Refresh This Page</button>
+    </div>
+
+    <script>
+        async function testServer() {
+            const statusDiv = document.getElementById('serverStatus');
+            try {
+                const response = await fetch('/api/health');
+                const data = await response.json();
+                statusDiv.innerHTML = `<div class="success">✅ Server is running! Status: ${data.status}</div>`;
+            } catch (error) {
+                statusDiv.innerHTML = `<div class="error">❌ Server connection failed: ${error.message}</div>`;
+            }
+        }
+
+        document.getElementById('uploadForm').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            
+            const resultDiv = document.getElementById('uploadResult');
+            const fileInput = document.getElementById('fileInput');
+            const file = fileInput.files[0];
+            
+            if (!file) {
+                resultDiv.innerHTML = '<div class="error">❌ Please select a file first</div>';
+                return;
+            }
+            
+            resultDiv.innerHTML = '<div class="info">🔄 Testing upload...</div>';
+            
+            const formData = new FormData();
+            formData.append('video', file);
+            formData.append('clip_duration', '30');
+            formData.append('overlap', '5');
+            formData.append('quality', '1080p');
+            
+            try {
+                const response = await fetch('/api/upload', {
+                    method: 'POST',
+                    body: formData
+                });
+                
+                const data = await response.json();
+                
+                if (response.ok) {
+                    resultDiv.innerHTML = `
+                        <div class="success">✅ Upload successful!</div>
+                        <div>Job ID: ${data.job_id}</div>
+                        <div>Status: ${data.status}</div>
+                    `;
+                } else {
+                    resultDiv.innerHTML = `<div class="error">❌ Upload failed: ${data.error}</div>`;
+                }
+            } catch (error) {
+                resultDiv.innerHTML = `<div class="error">❌ Network error: ${error.message}</div>`;
+            }
+        });
+
+        // Auto-test server on page load
+        window.onload = testServer;
+    </script>
+</body>
+</html>

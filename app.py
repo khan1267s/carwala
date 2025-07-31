@@ -23,6 +23,10 @@ OUTPUT_FOLDER = 'outputs'
 ALLOWED_EXTENSIONS = {'mp4', 'avi', 'mov', 'mkv', 'webm'}
 MAX_FILE_SIZE = 2 * 1024 * 1024 * 1024  # 2GB
 
+# Flask configuration for file uploads
+app.config['MAX_CONTENT_LENGTH'] = MAX_FILE_SIZE
+app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
+
 # Create directories
 os.makedirs(UPLOAD_FOLDER, exist_ok=True)
 os.makedirs(OUTPUT_FOLDER, exist_ok=True)
@@ -236,15 +240,28 @@ def process_video_job(video_path, job_id, settings):
 @app.route('/api/upload', methods=['POST'])
 def upload_video():
     try:
+        # Check if the post request has the file part
         if 'video' not in request.files:
-            return jsonify({'error': 'No video file provided'}), 400
+            return jsonify({'error': 'No video file provided. Please select a video file.'}), 400
         
         file = request.files['video']
-        if file.filename == '':
-            return jsonify({'error': 'No file selected'}), 400
+        if file.filename == '' or file.filename is None:
+            return jsonify({'error': 'No file selected. Please choose a video file.'}), 400
         
         if not allowed_file(file.filename):
-            return jsonify({'error': 'File type not supported'}), 400
+            return jsonify({'error': f'File type not supported. Please use: {", ".join(ALLOWED_EXTENSIONS).upper()}'}), 400
+        
+        # Check file size
+        file.seek(0, 2)  # Seek to end of file
+        file_size = file.tell()
+        file.seek(0)  # Reset to beginning
+        
+        if file_size > MAX_FILE_SIZE:
+            size_mb = file_size / (1024 * 1024)
+            return jsonify({'error': f'File too large ({size_mb:.1f} MB). Maximum size is 2GB.'}), 400
+        
+        if file_size == 0:
+            return jsonify({'error': 'File appears to be empty. Please select a valid video file.'}), 400
         
         # Generate unique job ID
         job_id = str(uuid.uuid4())
@@ -287,7 +304,12 @@ def upload_video():
         })
         
     except Exception as e:
-        return jsonify({'error': str(e)}), 500
+        print(f"Upload error: {str(e)}")
+        return jsonify({'error': f'Upload failed: {str(e)}'}), 500
+
+@app.errorhandler(413)
+def too_large(e):
+    return jsonify({'error': 'File too large. Maximum size is 2GB.'}), 413
 
 @app.route('/api/status/<job_id>')
 def get_status(job_id):
@@ -363,6 +385,11 @@ def cleanup_job(job_id):
 def index():
     """Serve the main HTML page"""
     return send_from_directory('.', 'index.html')
+
+@app.route('/test')
+def test_page():
+    """Serve the upload test page"""
+    return send_from_directory('.', 'test_upload.html')
 
 @app.route('/api/health')
 def health_check():
